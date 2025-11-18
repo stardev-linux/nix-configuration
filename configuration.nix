@@ -131,7 +131,6 @@ in
     flatpak = {
       enable = true;
       packages = [
-        "com.discordapp.Discord"
         "com.stremio.Stremio"
         "com.github.rafostar.Clapper"
         "org.prismlauncher.PrismLauncher"
@@ -233,10 +232,20 @@ in
 	  zapzap
 	  # gpu-screen-recorder-gtk
 	  heroic
+	  equibop
+	  
 
     #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     #  wget
   ]; 
+
+	  programs = {
+  ## appimage
+   appimage = {
+     enable = true;
+     binfmt = true;
+    };
+};
 
   fonts.packages = with pkgs; [
 	  noto-fonts
@@ -270,9 +279,17 @@ in
 
   # environment variable fixes
   environment.sessionVariables = {
-	  MESA_SHADER_CACHE_MAX_SIZE = "12G";
+	  __GL_SHADER_DISK_CACHE_SIZE = "12000000000";
 
   };
+
+  services.xserver.videoDrivers = [ "nvidia" ];
+  hardware = {
+    graphics.enable = true;
+    nvidia.open = true;
+    nvidia.package = config.boot.kernelPackages.nvidiaPackages.production;
+  };
+	
 
 
   # Some programs need SUID wrappers, can be configured further or are
