@@ -14,20 +14,19 @@ in
   imports =
     [ # Include the results of the hardware scan.
       "${nix-flatpak}/modules/nixos.nix"
+      ./hardware-configuration.nix
     ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Bootloader -- modified for lanzaboote
   boot = {
-    loader.systemd-boot.enable = lib.mkForce false;
-    loader.efi.canTouchEfiVariables = true;
-    loader.timeout = 2;
 
-    lanzaboote = {
-      enable = true;
-      pkiBundle = "/var/lib/sbctl";
-    };
+    
+      # Bootloader.
+	loader.grub.enable = true;
+	loader.grub.device = "/dev/sda";
+	loader.grub.useOSProber = true;
 
   # Use latest kernel.
     kernelPackages = pkgs.linuxPackages_latest;
@@ -131,7 +130,6 @@ in
     flatpak = {
       enable = true;
       packages = [
-        "com.discordapp.Discord"
         "com.stremio.Stremio"
         "com.github.rafostar.Clapper"
         "org.prismlauncher.PrismLauncher"
@@ -140,6 +138,15 @@ in
 	    "it.mijorus.gearlever"
 	    "com.usebottles.bottles"
 	    "com.github.ztefn.haguichi"
+	"com.mattjakeman.ExtensionManager"
+	"org.upscayl.Upscayl"
+	"nl.hjdskes.gcolor3"
+	"io.appflowy.AppFlowy"
+	"io.gitlab.adhami3310.Converter"
+	"io.github.vikdevelop.SaveDesktop"
+	"com.authormore.penpotdesktop"
+	"com.icons8.Lunacy"
+	"org.darktable.Darktable"
       ];
       update.auto = {
         enable = true;
@@ -223,6 +230,7 @@ in
 	  pciutils
 	  niv
 	  sbctl
+	  gnome-menus
 	  disfetch
 	  # apps
 	  mission-center
@@ -233,7 +241,7 @@ in
 	  zapzap
 	  # gpu-screen-recorder-gtk
 	  heroic
-
+      equibop
     #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     #  wget
   ]; 
@@ -270,10 +278,16 @@ in
 
   # environment variable fixes
   environment.sessionVariables = {
-	  MESA_SHADER_CACHE_MAX_SIZE = "12G";
+  __GL_SHADER_DISK_CACHE_SIZE = "12000000000";
 
   };
 
+    services.xserver.videoDrivers = [ "nvidia" ];
+  hardware = {
+    graphics.enable = true;
+    nvidia.open = true;
+    nvidia.package = config.boot.kernelPackages.nvidiaPackages.production;
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
