@@ -24,9 +24,8 @@ in
 
     
       # Bootloader.
-	loader.grub.enable = true;
-	loader.grub.device = "/dev/sda";
-	loader.grub.useOSProber = true;
+	loader.systemd-boot.enable = true;
+    loader.efi.canTouchEfiVariables = true;
 
   # Use latest kernel.
     kernelPackages = pkgs.linuxPackages_latest;
@@ -71,16 +70,17 @@ in
   };
 
   # Configure console keymap
-  console.keyMap = "us-acentos";
+  console.keyMap = "br-abnt2";
   security.rtkit.enable = true;
 
   # Enable the X11 windowing system.
   services = { 
     xserver.enable = true;
 
-    # Enable the GNOME Desktop Environment.
-    desktopManager.gnome.enable = true;
-    displayManager.gdm.enable = true;
+    # Enable the KDE Desktop Environment.
+        displayManager.sddm.enable = true;
+    displayManager.sddm.wayland.enable = true;
+    desktopManager.plasma6.enable = true;
 
     # Configure keymap in X11
     xserver.xkb = {
@@ -130,23 +130,26 @@ in
     flatpak = {
       enable = true;
       packages = [
-        "com.stremio.Stremio"
-        "com.github.rafostar.Clapper"
-        "org.prismlauncher.PrismLauncher"
+      "com.stremio.Stremio"
+      "com.github.rafostar.Clapper"
+      "org.prismlauncher.PrismLauncher"
 	    "app.zen_browser.zen"
 	    "org.vinegarhq.Sober"
 	    "it.mijorus.gearlever"
 	    "com.usebottles.bottles"
 	    "com.github.ztefn.haguichi"
-	"com.mattjakeman.ExtensionManager"
-	"org.upscayl.Upscayl"
-	"nl.hjdskes.gcolor3"
-	"io.appflowy.AppFlowy"
-	"io.gitlab.adhami3310.Converter"
-	"io.github.vikdevelop.SaveDesktop"
-	"com.authormore.penpotdesktop"
-	"com.icons8.Lunacy"
-	"org.darktable.Darktable"
+	    "com.mattjakeman.ExtensionManager"
+	    "org.upscayl.Upscayl"
+    	"nl.hjdskes.gcolor3"
+	    "io.appflowy.AppFlowy"
+	    "io.gitlab.adhami3310.Converter"
+	    "io.github.vikdevelop.SaveDesktop"
+	    "com.authormore.penpotdesktop"
+	    "com.icons8.Lunacy"
+	    "org.darktable.Darktable"
+      "io.github.equicord.equibop"
+      "org.fedoraproject.MediaWriter"
+      "com.parsecgaming.parsec"
       ];
       update.auto = {
         enable = true;
@@ -165,11 +168,6 @@ in
   # additional hardware
   hardware = {
     enableAllFirmware = true;
-
-    graphics = {
-      enable = true;
-      enable32Bit = true;
-    };
   };
     
   # Enable touchpad support (enabled default in most desktopManager).
@@ -209,14 +207,13 @@ in
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-	  # gnome extensions and stuff
+	  #gnome extensions and stuff
 	  #gnomeExtensions.arcmenu
 	  #gnomeExtensions.appindicator
 	  #gnomeExtensions.dash-to-panel
 	  #gnomeExtensions.caffeine
 	  #gnomeExtensions.clipboard-indicator
 	  #gnomeExtensions.blur-my-shell
-	  refine
 	  tela-icon-theme
 	  # utilities
 	  podman-compose
@@ -230,7 +227,6 @@ in
 	  pciutils
 	  niv
 	  sbctl
-	  gnome-menus
 	  disfetch
 	  # apps
 	  mission-center
@@ -241,7 +237,10 @@ in
 	  zapzap
 	  # gpu-screen-recorder-gtk
 	  heroic
-      equibop
+    kdePackages.partitionmanager
+	  kdePackages.qtmultimedia
+	  vscodium
+	  efibootmgr
     #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     #  wget
   ]; 
@@ -253,6 +252,8 @@ in
 	  liberation_ttf
 	  cantarell-fonts
   ];
+
+  fonts.fontconfig.enable = true;
 
   virtualisation = {
         containers.enable = true;
