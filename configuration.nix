@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 let
     sources = import ./sources.nix;
     nix-flatpak = builtins.fetchTarball {
@@ -16,8 +16,6 @@ in
       "${nix-flatpak}/modules/nixos.nix"
       ./hardware-configuration.nix
     ];
-
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Bootloader -- modified for lanzaboote
   boot = {
@@ -84,8 +82,8 @@ in
 
     # Configure keymap in X11
     xserver.xkb = {
-      layout = "us";
-      variant = "intl";
+      layout = "br";
+      variant = "";
     };
 
     # Enable CUPS to print documents.
@@ -266,6 +264,7 @@ in
 
   # nix management automations
   nix.settings.auto-optimise-store = true;
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.gc = {
     automatic = true;
     dates = "weekly";
@@ -273,9 +272,35 @@ in
   };
   system.autoUpgrade = {
     enable = true;
+    flake = inputs.self.outPath;    
     dates = "daily";
     allowReboot = false;  # Set to true if you want automatic reboots
   };
+
+   # systemd services for automatic updates with flakes enabled
+  systemd.services.nixos-flake-update = {
+    description = "Update NixOS flake inputs";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "root";
+      WorkingDirectory = "/etc/nixos";
+      ExecStart = "${pkgs.nixVersions.stable}/bin/nix flake update";
+    };
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+  };
+  systemd.timers.nixos-flake-update = {
+    description = "Daily NixOS flake update timer";
+    wantedBy = [ "timers.target" ];
+    
+    timerConfig = {
+      OnCalendar = "daily";
+      OnBootSec = "15min"; 
+      Persistent = true;
+      RandomizedDelaySec = "1h";
+    };
+  };
+
 
   # environment variable fixes
   environment.sessionVariables = {
